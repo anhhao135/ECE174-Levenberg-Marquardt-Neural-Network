@@ -49,7 +49,6 @@ def NonLinearFunction2(x): #my own function that is linear
     output = x[0] + x[1] + x[2]
     return output
 
-
 def VectorNorm(x): #get norm of vector by squaring each element, then finding the root of their sum
     sum = 0
     for i in range(x.shape[0]):
@@ -150,7 +149,7 @@ def EvaluatePerformance(inputPoints, weights, nonLinearFunction):
     
     return sumOfErrorSquared
 
-def TrainNetwork(trainingData, iterations, initialWeights, lossLambda, initialTrustLambda, stopLossThreshold = 0.1, enableAutoStop = False):
+def TrainNetwork(trainingData, iterations, initialWeights, lossLambda, initialTrustLambda, nonLinearFunction, stopLossThreshold = 0.1, enableAutoStop = False):
 
     #train network iteratively using Levenberg-Marquardt algorithm
 
@@ -164,7 +163,7 @@ def TrainNetwork(trainingData, iterations, initialWeights, lossLambda, initialTr
 
     for iteration in range(iterations):
 
-        k_loss = CalculateLoss(trainingData, w_k, lossLambda, NonLinearFunction1) #loss before approximation minimization
+        k_loss = CalculateLoss(trainingData, w_k, lossLambda, nonLinearFunction) #loss before approximation minimization
 
         lossJacobian = CalculateLossJacobian(trainingData, w_k, lossLambda) #get the Jacobian at current weights vector point for first order Taylor approximation
 
@@ -178,7 +177,7 @@ def TrainNetwork(trainingData, iterations, initialWeights, lossLambda, initialTr
 
         #A matrix in normal equation can be constructed using the trust lambda and the Jacobian
 
-        b_top = np.matmul(lossJacobian, w_k) - LossFunctionResidualPass(trainingData, w_k, lossLambda, NonLinearFunction1) # Df(x) * x - f(x); x is weights, f(x) is loss function
+        b_top = np.matmul(lossJacobian, w_k) - LossFunctionResidualPass(trainingData, w_k, lossLambda, nonLinearFunction) # Df(x) * x - f(x); x is weights, f(x) is loss function
         b_bottom = np.sqrt(trustLambda) * w_k # (trust lambda) ^ 0.5 * x, x is weights
         b = np.concatenate((b_top, b_bottom)) #stack column vectors on top of each other is concat in numpy
 
@@ -186,16 +185,17 @@ def TrainNetwork(trainingData, iterations, initialWeights, lossLambda, initialTr
 
         w_kplus1 = SolveNormalEquation(A, b) #solve normal equation to find the next weights vector; this vector minimizes the 1st order approx. of the loss function
 
-        kplus1_loss = CalculateLoss(trainingData, w_kplus1, lossLambda, NonLinearFunction1) #loss after approximation minimization
+        kplus1_loss = CalculateLoss(trainingData, w_kplus1, lossLambda, nonLinearFunction) #loss after approximation minimization
 
         currentLoss.append(kplus1_loss) #add k+1 loss tracking array for plotting
 
         print(kplus1_loss)
 
-        if enableAutoStop == True and currentLoss <= stopLossThreshold: #if current loss is below threshold, stop training
+        if enableAutoStop == True and kplus1_loss <= stopLossThreshold: #if current loss is below threshold, stop training
             break 
 
         #LM algorithm specifies how to determine the next iteration's trust lambda and weights
+        #values of constants multiplied with trustlambda to change iteratively differs from textbook; found to have better convergence
 
         if kplus1_loss <= k_loss: #loss function is actually going down
             trustLambda = 0.9 * trustLambda #decrease trust lambda so weights take smaller jumps

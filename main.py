@@ -11,15 +11,16 @@ from lib import TrainNetwork #core training function of neural network
 
 #main script
 
-NonLinearFunction = NonLinearFunction1 #change non linear function here
+NonLinearFunction = NonLinearFunction2 #change non linear function here
 
-trainIterations = 250 #change this to change runtime; but this will affect performance
+trainIterations = 300 #change this to change runtime; but this will affect performance
 
 
 
 
 #varying loss reg. lambda of network, then observing performance
 #plot loss during training
+
 
 
 testingPoints = GenerateRandomPoints(100, 1) #generate 100 random points, where random vector elements stay within -1 and 1
@@ -33,7 +34,7 @@ initalWeights = np.random.uniform(-10, 10, 16) #randomly initialize 16 weights u
 
 for lossRegLambda in lossRegLambdas:
 
-    trainedWeights, loss = TrainNetwork(trainingPoints, trainIterations, initalWeights, lossRegLambda, initialTrustLambda) #train network with reg lambda
+    trainedWeights, loss = TrainNetwork(trainingPoints, trainIterations, initalWeights, lossRegLambda, initialTrustLambda, NonLinearFunction) #train network with reg lambda
             
     performance = EvaluatePerformance(testingPoints, trainedWeights, NonLinearFunction) #evaluate performance
 
@@ -78,7 +79,7 @@ for bound in bounds:
 
         initalWeights = np.random.uniform(-bound, bound, 16) #randomly initialize 16 weights uniformly in between the specified bound
 
-        trainedWeights, loss = TrainNetwork(trainingPoints, trainIterations, initalWeights, lossRegLambda, initialTrustLambda)
+        trainedWeights, loss = TrainNetwork(trainingPoints, trainIterations, initalWeights, lossRegLambda, initialTrustLambda, NonLinearFunction)
 
         performance = EvaluatePerformance(testingPoints, trainedWeights, NonLinearFunction)
 
@@ -110,11 +111,11 @@ performanceResults = []
 
 trainingPoints = GenerateRandomPoints(500, 1)
 
-initalWeights = np.random.uniform(-10, 10, 16) #randomly initialize 16 weights uniformly in between -100 and 100
+initalWeights = np.random.uniform(-10, 10, 16) #randomly initialize 16 weights uniformly in between -10 and 10
 lossRegLambda = 0.1
 initialTrustLambda = 1
 
-trainedWeights, loss = TrainNetwork(trainingPoints, trainIterations, initalWeights, lossRegLambda, initialTrustLambda)
+trainedWeights, loss = TrainNetwork(trainingPoints, trainIterations, initalWeights, lossRegLambda, initialTrustLambda, NonLinearFunction)
 
 for testCount in numberOfTestPoints:
     testingPoints = GenerateRandomPoints(testCount, 1)
